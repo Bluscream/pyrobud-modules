@@ -31,7 +31,7 @@ class PruneModule(module.Module):
         user = event.message.sender_id
         dbstr = f'autoprune_{event.message.chat_id}'
         current_users = await self.db.get(dbstr) or []
-        if user > 0 and user in current_users:
+        if user and user > 0 and user in current_users:
             await asyncio.sleep(await self.get_delay())
             await event.message.delete()
 

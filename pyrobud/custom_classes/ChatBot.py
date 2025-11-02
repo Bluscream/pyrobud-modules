@@ -305,7 +305,7 @@ class ChatBot(object):
             await self.replyAndDelete(message, text=f"You are {'no longer allowed to send media ❌' if self.check_for_media else 'allowed to send media now ✔'}", delete_after_s=15, delete_original=True)
         elif lower_txt.startswith("/setting "):
             args = lower_txt.replace("/setting ", "").split(" ")
-            self.settings[arg] = not self.settings[arg]
+            self.settings[args[0]] = not self.settings[args[0]]
             distr = "Enabled" if self.settings["enabled"] else "Disabled"
             await message.edit(f"{distr} `{self.name}` (`{self.id}`)")
         elif lower_txt == "/toggleinfo":
@@ -318,8 +318,7 @@ class ChatBot(object):
             await message.edit(f"`{self.name}` (`{self.id}`):\n\nSessions started: {sessions_started}\nSessions ended: {sessions_ended}")
 
     async def on_message_edited(self, message: tg.tl.custom.message.Message):
-        # self.print(f"on_message_edited")
-        pass
+        pass # self.print(f"on_message_edited")
 
     async def on_self_message_edited(self, message: tg.tl.custom.message.Message):
         self.print(f"on_self_message_edited")

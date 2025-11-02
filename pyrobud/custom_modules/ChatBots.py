@@ -39,7 +39,7 @@ class ChatBots(module.Module):
     async def on_message(self, event: tg.events.NewMessage.Event) -> None:
         if self.disabled: return
         chat_id = get_id(event.message.peer_id)
-        from_id = get_id(event.message.from_id) or event.message.sender_id
+        # from_id = get_id(event.message.from_id) or event.message.sender_id
         to_id = get_id(event.message.to_id)
         # print("New message in", chat_id, "from", from_id, "to", to_id,":",event.message.text)
         for bot in self.bots:

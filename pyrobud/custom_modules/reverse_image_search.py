@@ -28,7 +28,7 @@ class ReverseImageSearch(module.Module):
         iqdb.Provider(),
         # dans.Provider(),
         # sauce.Provider(),
-        # tineye.Provider()
+        # tineye.Provider()x
     ]
 
     async def on_load(self) -> None:

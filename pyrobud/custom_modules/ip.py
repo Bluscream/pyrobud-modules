@@ -25,16 +25,17 @@ class Ip(module.Module):
             response: str = f'({data["status"]})'
 
             if response == "(success)":
-                reply += f'**Country : ** ({data["country"]})\n' \
-                    f'**Region : ** ({data["regionName"]})\n' \
-                    f'**City : **({data["city"]})\n' \
-                    f'**ZIP Code : **({data["zip"]})\n' \
-                    f'**Latitude : **({data["lat"]})\n' \
-                    f'**Longitude : **({data["lon"]})\n' \
-                    f'**Timezone : **({data["timezone"]})\n' \
-                    f'**ISP : **({data["isp"]})\n' \
-                    f'**Organisation : **({data["org"]})\n' \
-                    f'**AS : **({data["as"]})\n'
+                reply += f'**IP : ** `{data["query"]}`\n' \
+                    f'**Country : ** `{data["country"]}`\n' \
+                    f'**Region : ** `{data["regionName"]}`\n' \
+                    f'**City : **`{data["city"]}`\n' \
+                    f'**ZIP Code : **`{data["zip"]}`\n' \
+                    f'**Latitude : **`{data["lat"]}`\n' \
+                    f'**Longitude : **`{data["lon"]}`\n' \
+                    f'**Timezone : **`{data["timezone"]}`\n' \
+                    f'**ISP : **`{data["isp"]}`\n' \
+                    f'**Organisation : **`{data["org"]}`\n' \
+                    f'**AS : **`{data["as"]}`\n'
             else:
                 reply += "Invalid"
             return re.sub("[()]", "", reply)
