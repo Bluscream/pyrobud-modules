@@ -6,7 +6,7 @@ from typing import IO
 import telethon as tg
 
 from .. import command, module, util
-from pyrobud.util.bluscream import has_affecting_media, get_id
+from .util.bluscream import has_affecting_media, get_id
 
 
 class CalModule(module.Module):

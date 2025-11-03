@@ -6,7 +6,7 @@ from typing import IO
 import telethon as tg
 
 from .. import command, module, util
-from pyrobud.util.bluscream import get_entity, UserStr
+from .util.bluscream import get_entity, UserStr
 
 from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:

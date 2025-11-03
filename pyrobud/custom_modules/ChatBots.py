@@ -4,10 +4,10 @@ from pyrobud import command, module, util
 from re import match, compile
 from urllib.parse import urlparse
 
-from pyrobud.util.bluscream import has_affecting_media, get_id
+from .util.bluscream import has_affecting_media, get_id
 
-from ..custom_classes.ChatBot import *
-from ..custom_classes.ChatBots import ChatIncognitoBot, BetaIncognitoBot, ChattismoBot, RandomChatssBot, AnonimeChatBot
+from ..classes.ChatBot import *
+from ..classes.ChatBots import ChatIncognitoBot, BetaIncognitoBot, ChattismoBot, RandomChatssBot, AnonimeChatBot
 
 from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:

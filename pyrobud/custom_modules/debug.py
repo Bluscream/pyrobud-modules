@@ -2,11 +2,11 @@ from re import MULTILINE, finditer
 
 import telethon as tg
 
-from pyrobud.util.bluscream import UserStr, telegram_uid_regex, linkify_fullname
+from .util.bluscream import UserStr, telegram_uid_regex, linkify_fullname
 from .. import command, module
 
 from typing import TYPE_CHECKING
-if TYPE_CHECKING: from ..custom_classes.DataCenter import DataCenter
+if TYPE_CHECKING: from ..classes.DataCenter import DataCenter
 
 
 class DebugModuleAddon(module.Module):

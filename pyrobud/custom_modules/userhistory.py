@@ -1,6 +1,6 @@
 # from datetime import datetime, timezone
 from .. import command, module, util
-from ..util.bluscream import *
+from .util.bluscream import *
 # import re, json, http.client
 import telethon as tg
 

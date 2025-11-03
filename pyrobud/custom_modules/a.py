@@ -1,6 +1,6 @@
 
 from .. import module
-from ..custom_classes.DataCenter import DataCenters
+from ..classes.DataCenter import DataCenters
 
 
 class StartupModule(module.Module):
