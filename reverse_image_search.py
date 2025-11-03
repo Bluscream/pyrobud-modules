@@ -6,8 +6,8 @@ from typing import IO
 import telethon as tg
 from .. import command, module, util
 from aiohttp import ClientSession
-from ..classes.RevImgProviders import iqdb, tineye
-from ..classes.RevImgProvider import ReverseImageSearchProvider
+from .classes.RevImgProviders import iqdb, tineye
+from .classes.RevImgProvider import ReverseImageSearchProvider
 
 from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:

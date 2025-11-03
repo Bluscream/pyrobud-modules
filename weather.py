@@ -9,9 +9,9 @@ from urllib.parse import quote
 # import telethon as tg
 
 from .. import command, module, util
-from ..classes.IpApi import IPAPIResponse, ipapi_response_from_dict
-from ..classes.WeatherApi import WeatherResponse, weather_response_from_dict
-from ..classes.GeoLocationApi import GeoLocationSearchResponseElement, geo_location_search_response_from_dict
+from .classes.IpApi import IPAPIResponse, ipapi_response_from_dict
+from .classes.WeatherApi import WeatherResponse, weather_response_from_dict
+from .classes.GeoLocationApi import GeoLocationSearchResponseElement, geo_location_search_response_from_dict
 
 
 class WeatherModule(module.Module):

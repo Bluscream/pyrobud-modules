@@ -6,8 +6,8 @@ from urllib.parse import urlparse
 
 from .util.bluscream import has_affecting_media, get_id
 
-from ..classes.ChatBot import *
-from ..classes.ChatBots import ChatIncognitoBot, BetaIncognitoBot, ChattismoBot, RandomChatssBot, AnonimeChatBot
+from .classes.ChatBot import *
+from .classes.ChatBots import ChatIncognitoBot, BetaIncognitoBot, ChattismoBot, RandomChatssBot, AnonimeChatBot
 
 from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
