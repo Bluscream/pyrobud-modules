@@ -2,8 +2,6 @@ from typing import Union, List
 
 import telethon as tg
 from .. import command, module, util
-from re import compile, MULTILINE, IGNORECASE
-from json import dumps
 from telethon.tl.functions.messages import GetCommonChatsRequest
 
 try:

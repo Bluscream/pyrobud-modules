@@ -3,10 +3,8 @@ Pyrobud module to report a message to spamwat.ch
 Author : Ojas Sinha<sinhaojas67@gmail.com>
 """
 
-import asyncio
-
-from pyrobud import command, module, util
-from telethon import functions, types
+from pyrobud import command, module
+from telethon import functions
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     import telethon as tg
