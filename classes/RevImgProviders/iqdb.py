@@ -1,9 +1,15 @@
-from ..RevImgProvider import *
-from pyrobud import command, module, util
 from pathlib import Path
 from aiohttp import ClientResponse
-from bs4 import BeautifulSoup
 from os import path as ospath
+
+from ..RevImgProvider import *
+
+try:
+    from bs4 import BeautifulSoup
+    BS4_AVAILABLE = True
+except ImportError:
+    BS4_AVAILABLE = False
+    BeautifulSoup = None
 
 class Provider(ReverseImageSearchProvider):
     name: str = "IQDB"
@@ -15,6 +21,9 @@ class Provider(ReverseImageSearchProvider):
         return resp.text()
     
     async def parse_response(self, resp: ClientResponse):
+        if not BS4_AVAILABLE:
+            return "BeautifulSoup4 not installed - install it to enable reverse image search"
+        
         soup = BeautifulSoup(await resp.text(), 'html.parser')
         # This is for the no relevant matches case
         pages_div = soup.find(id='pages').find_all('div')[1]

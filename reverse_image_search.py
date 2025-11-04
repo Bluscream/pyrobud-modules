@@ -2,28 +2,40 @@ from pathlib import PurePosixPath
 from typing import IO, TYPE_CHECKING
 import telethon as tg
 
-from .. import command, module, util
-from .classes.RevImgProviders import iqdb
+from pyrobud import command, module, util
 from .classes.RevImgProvider import ReverseImageSearchProvider
+
+# Import providers with bs4 conditionally
+try:
+    from .classes.RevImgProviders import iqdb
+    PROVIDERS_AVAILABLE = True
+except ImportError as e:
+    PROVIDERS_AVAILABLE = False
+    iqdb = None
+    print(f"Warning: Could not load reverse image search providers: {e}")
 
 if TYPE_CHECKING:
     from pyrobud.core.bot import Bot
 
 
+@util.dependencies.requires('beautifulsoup4>=4.9.0')
 class ReverseImageSearch(module.Module):
     name = "Reverse Image search"
     disabled = False
 
-    bot: "Bot"
-    # client: tg.TelegramClient
-    db: util.db.AsyncDB
-
-    providers: list[ReverseImageSearchProvider] = [
-        iqdb.Provider(),
-        # dans.Provider(),
-        # sauce.Provider(),
-        # tineye.Provider()x
-    ]
+    def __init__(self, bot: "Bot"):
+        super().__init__(bot)
+        self.bot: "Bot" = bot
+        self.db: util.db.AsyncDB = None
+        self.providers: list[ReverseImageSearchProvider] = []
+        
+        # Only initialize providers if dependencies are available
+        if PROVIDERS_AVAILABLE and iqdb:
+            self.providers.append(iqdb.Provider())
+            # Add more providers here when available:
+            # self.providers.append(dans.Provider())
+            # self.providers.append(sauce.Provider())
+            # self.providers.append(tineye.Provider())
 
     async def on_load(self) -> None:
         self.db = self.bot.get_db("reverse_image_search")
@@ -36,8 +48,10 @@ class ReverseImageSearch(module.Module):
 
     @command.desc("Reverse search a image or a profile picture")
     @command.alias("rev")
-    # @command.usage("[text to echo?, or reply]", optional=True, reply=True)
     async def cmd_reverse(self, ctx: command.Context) -> str:
+        if not PROVIDERS_AVAILABLE or not self.providers:
+            return "Reverse image search is not available - bs4 (BeautifulSoup4) is not installed"
+        
         await ctx.respond("Processing...")
 
         photos: dict[str,bytes] = {}

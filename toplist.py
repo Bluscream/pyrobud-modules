@@ -2,21 +2,25 @@ from typing import Union, List
 from telethon.tl.functions.messages import GetCommonChatsRequest
 import telethon as tg
 
-from .. import command, module, util
+from pyrobud import command, module, util
 
-try:
-    from BeautifulSoup import BeautifulSoup, element
-except ImportError:
-    from bs4 import BeautifulSoup, element
-
+@util.dependencies.requires('beautifulsoup4>=4.9.0')
 class TopListModule(module.Module):
     name = "Top Lists"
     disabled = True
+    
+    async def on_load(self) -> None:
+        """Initialize module and import dependencies."""
+        # Dependencies are now guaranteed to be installed
+        global BeautifulSoup, element
+        from bs4 import BeautifulSoup, element
     # no_mention_pattern = compile(r'<template type="([\w_]+)" value_type="([\w_]+)">([\w\s_]+)</template>')
     # user_pattern = compile(r'<user id="(\d+)" first_name="\w+" last_name="\w+" user_name="\w+"/>')
     last_edited = 0
 
     async def parse_message(self, msg: tg.custom.Message):
+        from bs4 import BeautifulSoup
+        
         txt = msg.raw_text
         html = BeautifulSoup(txt, features="html.parser")
         user: element.Tag

@@ -1,9 +1,15 @@
-from ..RevImgProvider import *
-from pyrobud import command, module, util
 from pathlib import Path
 from aiohttp import ClientResponse
-from bs4 import BeautifulSoup
 from os import path as ospath
+
+from ..RevImgProvider import *
+
+try:
+    from bs4 import BeautifulSoup
+    BS4_AVAILABLE = True
+except ImportError:
+    BS4_AVAILABLE = False
+    BeautifulSoup = None
 
 class Provider(ReverseImageSearchProvider):
     name: str = "TinEye"
@@ -16,6 +22,9 @@ class Provider(ReverseImageSearchProvider):
         return await resp.text()
     
     async def parse_response(self, resp: ClientResponse):
+        if not BS4_AVAILABLE:
+            return "BeautifulSoup4 not installed - install it to enable reverse image search"
+        
         ret = ['**Pages:** ']
         soup = BeautifulSoup(await resp.text(), 'html.parser')
         pages = []
