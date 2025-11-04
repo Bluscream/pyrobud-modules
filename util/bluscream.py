@@ -47,7 +47,24 @@ def splitMsg(msg, chars=4096):
     return [msg[i:i + chars] for i in range(0, len(msg), chars)]
 
 def get_id(peer_id):
-    return peer_id.user_id if hasattr(peer_id, 'user_id') else 0
+    """Extract ID from various Telethon peer types."""
+    if peer_id is None:
+        return 0
+    
+    # Handle integer IDs directly
+    if isinstance(peer_id, int):
+        return peer_id
+    
+    # Handle Peer types
+    if hasattr(peer_id, 'user_id'):
+        return peer_id.user_id
+    elif hasattr(peer_id, 'channel_id'):
+        return peer_id.channel_id
+    elif hasattr(peer_id, 'chat_id'):
+        return peer_id.chat_id
+    
+    # Fallback
+    return 0
 
 def ChatStr(chat: tg.types.Chat):
     if isinstance(chat, InputPeerChannel): return f"{chat.channel_id}"

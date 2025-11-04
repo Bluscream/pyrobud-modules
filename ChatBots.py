@@ -1,3 +1,4 @@
+import traceback
 from typing import TYPE_CHECKING, List
 import telethon as tg
 
@@ -45,8 +46,11 @@ class ChatBots(module.Module):
         if not event.message or not event.message.text:
             return
         
+        # Get the chat ID (where the message was sent)
         chat_id = get_id(event.message.peer_id)
-        to_id = get_id(event.message.to_id)
+        
+        # Get who sent the message
+        sender_id = get_id(event.message.from_id) or event.message.sender_id
         
         # Find the bot this message belongs to
         for bot in self.bots:
@@ -54,13 +58,18 @@ class ChatBots(module.Module):
                 continue
             
             # Route message to appropriate handler
+            # If we sent the message, it's a message TO the bot (commands, etc.)
+            # If the bot sent the message, it's a message FROM the bot (responses, session info)
             try:
-                if to_id == bot.id:
+                if sender_id == self.bot.uid:
+                    # We sent this message to the bot
                     await bot.on_message_to_bot(event.message)
                 else:
+                    # The bot sent this message to us
                     await bot.on_message_from_bot(event.message)
             except Exception as ex:
                 print(f"[{bot.name}] Error handling message: {ex}")
+                traceback.print_exc()
             
             break  # Only process for one bot
 
@@ -86,6 +95,7 @@ class ChatBots(module.Module):
                     await bot.on_message_edited(event.message)
             except Exception as ex:
                 print(f"[{bot.name}] Error handling edited message: {ex}")
+                traceback.print_exc()
             
             break  # Only process for one bot
 
