@@ -17,8 +17,8 @@ class Bot(ChatBot):
         Command.REVOKE_MESSAGE: "delete"
     }
     regexes: dict[Regex, re.Pattern] = {
-        Regex.SESSION_SEARCHING: re.compile("🔍 Searching... Use /stopsearch if you want to stop it"),
-        Regex.SESSION_START: re.compile("(?:Gender: (?P<sex>👤|👦)\n\n)?(?:📅 Age: (?P<age>\d+)\n\n)?ID CHAT: (?P<id>.+)"), # (?:Gender:\s+(?P<sex>👤|👦)\s+)?(?:📅\s+Age:\s+(?P<age>\d+))?.*\s+ID\s+CHAT:\s+(?P<id>.+)")
-        # Regex.MESSAGE_PARTNER: re.compile(""),
-        Regex.SESSION_END: re.compile("👋 Your partner has left the chat"),
+        Regex.SESSION_SEARCHING: re.compile(r"🔍 Searching... Use /stopsearch if you want to stop it"),
+        Regex.SESSION_START: re.compile(r"(?:Gender: (?P<sex>👤|👦)\n\n)?(?:📅 Age: (?P<age>\d+)\n\n)?ID CHAT: (?P<id>.+)"), # (?:Gender:\s+(?P<sex>👤|👦)\s+)?(?:📅\s+Age:\s+(?P<age>\d+))?.*\s+ID\s+CHAT:\s+(?P<id>.+)")
+        # Regex.MESSAGE_PARTNER: re.compile(r""),
+        Regex.SESSION_END: re.compile(r"👋 Your partner has left the chat"),
     }

@@ -22,12 +22,12 @@ class Bot(ChatBot):
 
     }
     regexes: dict[Regex, re.Pattern] = {
-        Regex.SESSION_SEARCHING: re.compile(".*🔍$"), # b'\\U0001f50d'
-        Regex.SESSION_START: re.compile("⬇️️️️.*⬇️️️️"), # u\2B07
-        Regex.SESSION_END: re.compile("⬆️.*⬆️"),
-        Regex.SESSION_URL: re.compile("🔓🔑"),
-        Regex.PARTNER_AGE: re.compile("📆\s+\w+\:\s+(?P<age>\d+)"),
-        Regex.PARTNER_DISTANCE: re.compile("\📍\s*[<>]?\s+(?P<distance>\d+)\s+km"),
-        Regex.MESSAGE_PARTNER: re.compile(".*(?P<sex>[🗣👧👦])Partner: (?P<msg>.*)"),
-        Regex.MESSAGE_AUTHOR: re.compile("^[⚠⚠️]"),
+        Regex.SESSION_SEARCHING: re.compile(r".*🔍$"), # b'\\U0001f50d'
+        Regex.SESSION_START: re.compile(r"⬇️️️️.*⬇️️️️"), # u\2B07
+        Regex.SESSION_END: re.compile(r"⬆️.*⬆️"),
+        Regex.SESSION_URL: re.compile(r"🔓🔑"),
+        Regex.PARTNER_AGE: re.compile(r"📆\s+\w+\:\s+(?P<age>\d+)"),
+        Regex.PARTNER_DISTANCE: re.compile(r"📍\s*[<>]?\s+(?P<distance>\d+)\s+km"),
+        Regex.MESSAGE_PARTNER: re.compile(r".*(?P<sex>[🗣👧👦])Partner: (?P<msg>.*)"),
+        Regex.MESSAGE_AUTHOR: re.compile(r"^[⚠⚠️]"),
     }

@@ -2,7 +2,7 @@ import asyncio, json
 from ipaddress import IPv4Address
 from aiohttp import ClientSession
 
-from ..custom_classes.IpApi import IPAPIResponse, ipapi_response_from_dict
+from .IpApi import IPAPIResponse, ipapi_response_from_dict
 
 class DataCenter(object):
     id: int

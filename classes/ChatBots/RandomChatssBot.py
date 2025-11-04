@@ -14,6 +14,6 @@ class Bot(ChatBot):
         Command.NEW_CHAT: "start"
     }
     regexes: dict[Regex, re.Pattern] = {
-        Regex.SESSION_END: re.compile("\*\*Chat beendet\*\*"),
-        Regex.SESSION_START: re.compile("\n🗣\w+ (?P<sex>👤|🧔) \w+\n")
+        Regex.SESSION_END: re.compile(r"\*\*Chat beendet\*\*"),
+        Regex.SESSION_START: re.compile(r"\n🗣\w+ (?P<sex>👤|🧔) \w+\n")
     }
