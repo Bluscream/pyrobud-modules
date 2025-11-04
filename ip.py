@@ -3,8 +3,7 @@ Pyrobud module to get details of a given IP address.
 Author : Ojas Sinha<sinhaojas67@gmail.com>
 """
 
-import json
-import re
+import json, re
 
 from pyrobud import command, module
 

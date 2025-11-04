@@ -1,11 +1,10 @@
 import asyncio
-
+from typing import TYPE_CHECKING
 import telethon as tg
 
 from .. import command, module, util
 from .util.bluscream import get_entity, UserStr
 
-from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pyrobud.core.bot import Bot
 

@@ -1,8 +1,9 @@
-from pyrobud import command, module
 import os
 from pathlib import Path
-import telethon as tg
 from time import time
+import telethon as tg
+
+from pyrobud import command, module
 
 class MediaDownloader(module.Module):
     """Module to download all media from a chat."""

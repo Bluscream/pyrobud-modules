@@ -1,5 +1,6 @@
+import http.client, json, re
+
 from pyrobud import command, module
-import re, json, http.client
 
 class myTeamspeak(module.Module):
     name = "myTeamspeak"

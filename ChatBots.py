@@ -1,11 +1,10 @@
+from typing import TYPE_CHECKING, Any
+
 from pyrobud import command, module, util
-
 from .util.bluscream import get_id
-
 from .classes.ChatBot import *
 from .classes.ChatBots import ChatIncognitoBot, BetaIncognitoBot, ChattismoBot, RandomChatssBot, AnonimeChatBot
 
-from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from pyrobud.core.bot import Bot
     from pyrobud import core

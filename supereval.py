@@ -1,9 +1,10 @@
-import telethon as tg
 import asyncio
-from telethon.tl.types import PeerUser
 from datetime import timedelta, datetime
-from .. import module, util
 from random import shuffle, choice
+from telethon.tl.types import PeerUser
+import telethon as tg
+
+from .. import module, util
 
 
 class SuperEval(module.Module):

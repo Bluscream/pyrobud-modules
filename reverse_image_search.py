@@ -1,12 +1,11 @@
 from pathlib import PurePosixPath
-from typing import IO
-
+from typing import IO, TYPE_CHECKING
 import telethon as tg
+
 from .. import command, module, util
 from .classes.RevImgProviders import iqdb
 from .classes.RevImgProvider import ReverseImageSearchProvider
 
-from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pyrobud.core.bot import Bot
 

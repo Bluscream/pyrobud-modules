@@ -1,8 +1,8 @@
 from typing import Union, List
-
-import telethon as tg
-from .. import command, module, util
 from telethon.tl.functions.messages import GetCommonChatsRequest
+import telethon as tg
+
+from .. import command, module, util
 
 try:
     from BeautifulSoup import BeautifulSoup, element

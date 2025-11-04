@@ -1,7 +1,8 @@
 import re
-from pyrobud import command, module
 from telethon.tl.functions.messages import SearchRequest
 from telethon.tl.types import InputMessagesFilterEmpty
+
+from pyrobud import command, module
 
 class ChatSearch(module.Module):
     name: str="Chat Search"

@@ -3,8 +3,9 @@ A pyrobud module to download a file to the host.
 Author : Ojas Sinha<sinhaojas67@gmail.com
 """
 
-from io import BytesIO
 import os
+from io import BytesIO
+
 from pyrobud import command, module, util
 
 class Download(module.Module):

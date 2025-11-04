@@ -1,12 +1,12 @@
 from re import MULTILINE, finditer
-
+from typing import TYPE_CHECKING
 import telethon as tg
 
-from .util.bluscream import UserStr, telegram_uid_regex
 from .. import command, module
+from .util.bluscream import UserStr, telegram_uid_regex
 
-from typing import TYPE_CHECKING
-if TYPE_CHECKING: from .classes.DataCenter import DataCenter
+if TYPE_CHECKING:
+    from .classes.DataCenter import DataCenter
 
 
 class DebugModuleAddon(module.Module):

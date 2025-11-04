@@ -1,8 +1,7 @@
-# from datetime import datetime, timezone
+import telethon as tg
+
 from .. import command, module, util
 from .util.bluscream import *
-# import re, json, http.client
-import telethon as tg
 
 class UserHistory(module.Module):
     name = "User History"

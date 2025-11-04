@@ -1,6 +1,7 @@
 from datetime import timedelta
-import telethon as tg
 from telethon.tl.types import ChannelParticipantsAdmins
+import telethon as tg
+
 from .. import command, module, util
 
 class LoggerModule(module.Module):

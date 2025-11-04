@@ -1,6 +1,7 @@
 from datetime import timedelta
-import telethon as tg
 from telethon.tl.patched import MessageService
+import telethon as tg
+
 from .. import command, module
 
 class CallUtilsModule(module.Module):

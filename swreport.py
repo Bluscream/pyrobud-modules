@@ -3,9 +3,11 @@ Pyrobud module to report a message to spamwat.ch
 Author : Ojas Sinha<sinhaojas67@gmail.com>
 """
 
-from pyrobud import command, module
-from telethon import functions
 from typing import TYPE_CHECKING
+from telethon import functions
+
+from pyrobud import command, module
+
 if TYPE_CHECKING:
     import telethon as tg
 

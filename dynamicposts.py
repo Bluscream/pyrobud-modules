@@ -1,5 +1,4 @@
-import asyncio
-import time
+import asyncio, time
 from datetime import datetime, timedelta
 
 from pyrobud import module
