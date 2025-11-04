@@ -1,15 +1,10 @@
-import asyncio
-from dataclasses import dataclass
-from enum import Enum
-from random import choice, randint, randrange
-from urllib import parse
+import asyncio, json, re
 from datetime import datetime, timedelta
-from typing import TYPE_CHECKING, List, ClassVar, Any
-from enum import auto
+from enum import Enum, auto
+from random import choice, randint, randrange
+from typing import TYPE_CHECKING, List, Any, Optional
+from urllib import parse
 import telethon as tg
-import json, re
-
-# from pyrobud.util.bluscream import get_id
 
 if TYPE_CHECKING:
     from pyrobud.module import Module
@@ -56,13 +51,20 @@ class SessionCloser(Enum):
 
 # region subclasses
 class Partner(object):
-    gender: Gender = None
-    age: int = None
-    location: tg.tl.custom.inlineresult.InlineResult.LOCATION = None
-    vip: bool = None
+    def __init__(self):
+        self.gender: Optional[Gender] = None
+        self.age: Optional[int] = None
+        self.location: Optional[tg.tl.custom.inlineresult.InlineResult.LOCATION] = None
+        self.vip: Optional[bool] = None
+        self._distance_km: Optional[int] = None
+    
     @property
-    def distance_km(self) -> int:
-        return -1 # Todo: Implement
+    def distance_km(self) -> Optional[int]:
+        return self._distance_km
+    
+    @distance_km.setter
+    def distance_km(self, value: Optional[int]):
+        self._distance_km = value
     
     def __str__(self) -> str:
         parts = []
@@ -88,79 +90,87 @@ class Partner(object):
     #     # else: self.partner_gender = Gender.Unknown
 
 class Session(object):
-    bot: "ChatBot"
-    state: SessionState = SessionState.Unknown
-    partner: Partner = None
-    starttime: datetime = None
-    endtime: datetime = None
-    reopen_url: parse.ParseResult = None
-    messages: List[int] = list()
-    closer: SessionCloser = None
-    greeted: str = ""
+    def __init__(self, chatbot: "ChatBot"):
+        self.bot: "ChatBot" = chatbot
+        self.state: SessionState = SessionState.Unknown
+        self.partner: Partner = Partner()
+        self.starttime: datetime = datetime.now()
+        self.endtime: Optional[datetime] = None
+        self.reopen_url: Optional[parse.ParseResult] = None
+        self.messages: List[int] = []
+        self.closer: Optional[SessionCloser] = None
+        self.greeted: str = ""
 
     @property
-    def duration(self) -> timedelta:
-        return self.endtime - self.starttime
+    def duration(self) -> Optional[timedelta]:
+        if self.endtime and self.starttime:
+            return self.endtime - self.starttime
+        return None
 
     def __str__(self) -> str:
         pp = "State: " + str(self.state)
-        if self.partner is not None: pp += "\nPartner: " + str(self.partner)
-        if self.starttime is not None: pp += "\nStarttime: " + str(self.starttime)
-        if self.endtime is not None: pp += "\nEndtime: " + str(self.endtime)
-        if self.reopen_url is not None: pp += "\nURL: " + str(self.reopen_url)
+        if self.partner is not None: 
+            pp += "\nPartner: " + str(self.partner)
+        if self.starttime is not None: 
+            pp += "\nStarttime: " + str(self.starttime)
+        if self.endtime is not None: 
+            pp += "\nEndtime: " + str(self.endtime)
+        if self.duration is not None:
+            pp += "\nDuration: " + str(self.duration)
+        if self.reopen_url is not None: 
+            pp += "\nURL: " + str(self.reopen_url)
         pp += "\n" + str(len(self.messages)) + " Messages: " + str(self.messages)
-        if self.closer is not None: pp += "\nCloser: " + str(self.closer)
-        if self.greeted is not None: pp += "\nGreeted with: " + str(self.greeted)
+        if self.closer is not None: 
+            pp += "\nCloser: " + str(self.closer)
+        if self.greeted: 
+            pp += "\nGreeted with: " + str(self.greeted)
         return pp
 
-    @classmethod
     def close(self):
+        """Close the session and set the end time."""
         self.endtime = datetime.now()
         self.state = SessionState.Ended
 
-    # @classmethod
-    # def stop(self, module):  # : ChatIncognitoBot.ChatIncognitoBot):
-    #     module.sendAndDelete(self.comm)
-    #     self.close()
-
-    def __init__(self, chatbot: "ChatBot"):  #  = SessionState.Searching
-        self.bot = chatbot
-        self.starttime = datetime.now()
-        if not self.partner: self.partner = Partner()
-        # self.state = state
-
 
 class Settings(object):
-    language: str
-    use_keyboards: bool
-    own_gender: Gender
-    partner_gender: Gender
-    location: tg.tl.custom.inlineresult.InlineResult.LOCATION
-    birthdate: datetime
-    partner_age_min: int
-    partner_age_max: int
-    reopen_requests_enabled: bool
+    def __init__(self):
+        self.language: Optional[str] = None
+        self.use_keyboards: bool = True
+        self.own_gender: Optional[Gender] = None
+        self.partner_gender: Optional[Gender] = None
+        self.location: Optional[tg.tl.custom.inlineresult.InlineResult.LOCATION] = None
+        self.birthdate: Optional[datetime] = None
+        self.partner_age_min: Optional[int] = None
+        self.partner_age_max: Optional[int] = None
+        self.reopen_requests_enabled: bool = False
 # endregion subclasses
 
 class ChatBot(object):
-    module: "Module"
-    name: str
-    id: int
+    # Class-level defaults (will be overridden per subclass)
+    name: str = "ChatBot"
+    id: int = 0
     prefix: str = "/"
-    commands: dict[Command, str] = dict()
-    regexes: dict[Regex, re.Pattern] = dict()
-    genders: dict[Gender, str] = dict()
-    sessions: list[Session] = list()
-    log_channels: dict[int, str] = { -1001344802682: "ChatIncognitoBotLog" }
-    settings: dict[str,Any] = {
-        "enabled": True,
-        "greet": True,
-        "greeting": "{r;Hallo|Hi|Hey|Was geht|Yo|Jo} {r;;:3|:D|<3|♥|👌|✌|c:|?}" # \n\nIm felix (m, 20) from germany\nwho are you and where are you from?
-    }
+    commands: dict[Command, str] = {}
+    regexes: dict[Regex, re.Pattern] = {}
+    genders: dict[Gender, str] = {}
+    
+    def __init__(self, mod: "Module"):
+        self.module: "Module" = mod
+        # Instance-level attributes to avoid sharing between instances
+        self.sessions: List[Session] = []
+        self.log_channels: dict[int, str] = {-1001344802682: "ChatIncognitoBotLog"}
+        self.settings: dict[str, Any] = {
+            "enabled": True,
+            "greet": True,
+            "greeting": "{r;Hallo|Hi|Hey|Was geht|Yo|Jo} {r;;:3|:D|<3|♥|👌|✌|c:|?}",
+            "check_for_media": False,
+            "add_info": False
+        }
+        # Greeting components (can be overridden in subclasses)
+        self.greeting_prefixes: List[str] = ["Hallo", "Hi", "Hey", "Yo"]
+        self.greeting_suffixes: List[str] = [":3", ":D", "<3", "♥", "👌", "✌"]
 
 # region methods
-    def __init__(self, mod: "Module"):
-        self.module = mod
 
     def __str__(self):
         return f"`{self.name}` (`{self.id}`)\nPrefix: `{self.prefix}`\nCommands: `{len(self.commands)}`\nPatterns: `{len(self.regexes)}`\nSessions: `{len(self.sessions)}`" # Greeting Combinations: `{len(self.greeting_prefixes)*len(self.greeting_suffixes)}
@@ -194,14 +204,27 @@ class ChatBot(object):
         self.print(f"Updated Session: {session}")
 
     async def greet(self):
-        return
+        """Send a greeting message to the partner."""
+        if not self.settings.get("greet", True):
+            return
+        
         session = self.getCurrentSession()
-        if session.greeted or session.state is not SessionState.Active or not self.id: return
-        await asyncio.sleep(randrange(1, 3)) # Todo: Sometimes wait for them to write first
+        if session.greeted or session.state != SessionState.Active or not self.id:
+            return
+        
+        # Wait a random amount before greeting
+        await asyncio.sleep(randrange(1, 3))
+        
+        # Build greeting
         prefix: str = choice(self.greeting_prefixes)
-        if choice((True, False)): prefix = prefix.lower()
+        if choice((True, False)):
+            prefix = prefix.lower()
         greeting = f"{prefix} {choice(self.greeting_suffixes)}"
-        if self.add_info: greeting += ""
+        
+        # Add info if enabled
+        if self.settings.get("add_info", False):
+            greeting += "\n\n(Additional info not implemented)"
+        
         await self.send_text(greeting)
         session.greeted = greeting
 
@@ -211,44 +234,70 @@ class ChatBot(object):
                 return gender
         return Gender.Unknown
     
-    def get_match_group(self, match: re.Match, name: str, _as: type = None):
-        if not name in match.groupdict(): return None
+    def get_match_group(self, match: re.Match, name: str, _as: Optional[type] = None):
+        """Extract a named group from a regex match and optionally convert to a type."""
+        if not name or name not in match.groupdict():
+            return None
         ret = match.group(name)
-        if ret is None: return None
-        match _as:
-            case type(bool): return bool(ret)
-            case type(float): return float(ret)
-            case type(int): return int(ret)
-        return ret
+        if ret is None:
+            return None
+        if _as is None:
+            return ret
+        # Convert to the requested type
+        try:
+            if _as == bool:
+                return bool(ret)
+            elif _as == float:
+                return float(ret)
+            elif _as == int:
+                return int(ret)
+            elif _as == str:
+                return str(ret)
+            else:
+                return ret
+        except (ValueError, TypeError):
+            return None
 
-    async def send_text(self, text: str, delete_after_s=None):
-        self.print(f"send_text(\"{text}\",delete_after_s={delete_after_s})")
+    async def send_text(self, text: str, delete_after_s: Optional[int] = None):
+        """Send a text message to the bot."""
+        self.print(f"send_text(\"{text}\", delete_after_s={delete_after_s})")
         msg = await self.module.bot.client.send_message(self.id, text)
-        self.print(msg)
-        if delete_after_s != None:
+        self.print(f"Message sent: {msg.id}")
+        if delete_after_s is not None:
             await asyncio.sleep(delete_after_s)
-            # await msg.delete()
+            try:
+                await msg.delete()
+            except Exception as ex:
+                self.print(f"Failed to delete message: {ex}")
 
-    async def send_command(self, command: Command, delete_after_s=5):
+    async def send_command(self, command: Command, delete_after_s: int = 5):
+        """Send a command to the bot."""
+        if command not in self.commands:
+            self.print(f"Command {command} not found in commands dict")
+            return
         cmd = self.prefix + self.commands[command]
-        self.print(f"send_command(\"{cmd}\",delete_after_s={delete_after_s})")
+        self.print(f"send_command(\"{cmd}\", delete_after_s={delete_after_s})")
         await self.send_text(cmd, delete_after_s)
 
-    def match(self, pattern: Regex, text: str) -> re.Match | None:
-        # self.print("pattern",pattern, "text", text)
-        if not pattern in self.regexes: return None
-        # patt = self.regexes[pattern]
-        # self.print("patt",patt)
-        # ret = patt.match(text, re.MULTILINE | re.UNICODE | re.DOTALL)
-        # self.print("ret",ret)
-        ret = self.regexes[pattern].match(text, re.MULTILINE | re.UNICODE | re.DOTALL)
-        if ret: return ret
-        ret = self.regexes[pattern].match(text, re.MULTILINE | re.UNICODE)
-        if ret: return ret
-        ret = self.regexes[pattern].match(text, re.MULTILINE)
-        if ret: return ret
-        ret = self.regexes[pattern].match(text)
-        return ret
+    def match(self, pattern: Regex, text: str) -> Optional[re.Match]:
+        """Try to match a regex pattern against text with various flag combinations."""
+        if pattern not in self.regexes or not text:
+            return None
+        
+        regex = self.regexes[pattern]
+        
+        # Try different flag combinations
+        for flags in [
+            re.MULTILINE | re.UNICODE | re.DOTALL,
+            re.MULTILINE | re.UNICODE,
+            re.MULTILINE,
+            0  # No flags
+        ]:
+            match = regex.search(text) if flags == 0 else regex.search(text)
+            if match:
+                return match
+        
+        return None
 # endregion methods
 
 # region events
@@ -271,12 +320,16 @@ class ChatBot(object):
             await self.send_command(Command.NEW_CHAT)
             await self.module.db.inc("sessions_ended")
         if session_start_match:
+            # Extract gender from match
+            gender_str = self.get_match_group(session_start_match, 'sex')
+            gender = self.get_gender(gender_str) if gender_str else None
+            
             self.updateCurrentSession(
                 SessionState.Active, None,
-                self.get_gender(self.get_match_group(session_start_match, '')),
-                self.get_match_group(session_start_match, 'age', type(int)),
-                self.get_match_group(session_start_match, 'distance', type(int)),
-                self.get_match_group(session_start_match, 'vip', type(bool)),
+                gender,
+                self.get_match_group(session_start_match, 'age', int),
+                self.get_match_group(session_start_match, 'distance', int),
+                self.get_match_group(session_start_match, 'vip', bool),
                 greeted=None
             )
             await self.greet()
@@ -291,31 +344,66 @@ class ChatBot(object):
             await message.delete()
 
     async def on_message_to_bot(self, message: tg.tl.custom.message.Message) -> None:
+        """Handle messages sent to the bot (commands from the user)."""
         self.print(f"on_message_to_bot: \"{message.text}\"")
+        
+        if not message.text:
+            return
+            
         lower_txt = message.text.lower()
+        
         if lower_txt == "/session":
-            lines = list()
-            # lines.append(f"Media blacklisted: `{self.check_for_media}`")
-            # lines.append(f"Last deleted media at: `{self.last_deleted_media}`")
-            lines.append(f"Sessions: `{len(self.sessions)}`")
-            if self.sessions: lines.append(f"Last Session: `{self.getCurrentSession()}`")
-            if len(lines) > 0: await message.edit("\n".join(lines))
+            lines = []
+            lines.append(f"**Bot:** `{self.name}` (`{self.id}`)")
+            lines.append(f"**Media check:** `{self.settings.get('check_for_media', False)}`")
+            lines.append(f"**Sessions:** `{len(self.sessions)}`")
+            if self.sessions:
+                current = self.getCurrentSession()
+                lines.append(f"\n**Current Session:**")
+                lines.append(f"State: `{current.state.name}`")
+                if current.partner and current.partner.gender:
+                    lines.append(f"Partner: `{current.partner.gender.name}`")
+                if current.starttime:
+                    lines.append(f"Started: `{current.starttime.strftime('%H:%M:%S')}`")
+            await message.edit("\n".join(lines))
+            
         elif lower_txt == "/media":
-            self.check_for_media = not self.check_for_media
-            await self.replyAndDelete(message, text=f"You are {'no longer allowed to send media ❌' if self.check_for_media else 'allowed to send media now ✔'}", delete_after_s=15, delete_original=True)
+            current = self.settings.get("check_for_media", False)
+            self.settings["check_for_media"] = not current
+            new_state = self.settings["check_for_media"]
+            response = f"You are {'no longer allowed to send media ❌' if new_state else 'allowed to send media now ✔'}"
+            await message.reply(response)
+            await asyncio.sleep(15)
+            try:
+                await message.delete()
+            except:
+                pass
+                
         elif lower_txt.startswith("/setting "):
             args = lower_txt.replace("/setting ", "").split(" ")
-            self.settings[args[0]] = not self.settings[args[0]]
-            distr = "Enabled" if self.settings["enabled"] else "Disabled"
-            await message.edit(f"{distr} `{self.name}` (`{self.id}`)")
+            if args and args[0] in self.settings:
+                self.settings[args[0]] = not self.settings[args[0]]
+                state = "Enabled" if self.settings[args[0]] else "Disabled"
+                await message.edit(f"{state} `{args[0]}` for `{self.name}` (`{self.id}`)")
+            else:
+                await message.edit(f"Unknown setting. Available: {', '.join(self.settings.keys())}")
+                
         elif lower_txt == "/toggleinfo":
-            self.add_info = not self.add_info
-            distr = "Enabled" if self.add_info else "Disabled"
-            await message.edit(f"{distr} info for `{self.name}` (`{self.id}`)")
+            current = self.settings.get("add_info", False)
+            self.settings["add_info"] = not current
+            state = "Enabled" if self.settings["add_info"] else "Disabled"
+            await message.edit(f"{state} info for `{self.name}` (`{self.id}`)")
+            
         elif lower_txt == "/stats":
-            sessions_started = await self.module.db.get("sessions_started", -1)
-            sessions_ended = await self.module.db.get("sessions_ended", -1)
-            await message.edit(f"`{self.name}` (`{self.id}`):\n\nSessions started: {sessions_started}\nSessions ended: {sessions_ended}")
+            sessions_started = await self.module.db.get("sessions_started", 0)
+            sessions_ended = await self.module.db.get("sessions_ended", 0)
+            active_sessions = len([s for s in self.sessions if s.state == SessionState.Active])
+            await message.edit(
+                f"**{self.name}** (`{self.id}`):\n\n"
+                f"Sessions started: `{sessions_started}`\n"
+                f"Sessions ended: `{sessions_ended}`\n"
+                f"Currently active: `{active_sessions}`"
+            )
 
     async def on_message_edited(self, message: tg.tl.custom.message.Message):
         pass # self.print(f"on_message_edited")
