@@ -1,10 +1,7 @@
-import asyncio
-import re
-from datetime import timedelta, datetime, timezone
-from telethon.tl.types import PeerUser, PeerChannel
-from .. import command, module, util
+from datetime import timedelta
 import telethon as tg
 from telethon.tl.patched import MessageService
+from .. import command, module
 
 class CallUtilsModule(module.Module):
     name = "CallUtils"

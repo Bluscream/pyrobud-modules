@@ -1,7 +1,6 @@
 import asyncio
 
 import telethon as tg
-from telethon.tl.types import PeerUser
 
 from pyrobud import module
 

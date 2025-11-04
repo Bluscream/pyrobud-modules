@@ -1,6 +1,3 @@
-import asyncio
-from random import uniform
-
 import telethon as tg
 
 from pyrobud import module

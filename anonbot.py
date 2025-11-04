@@ -1,11 +1,6 @@
-import asyncio
-import io
-from pathlib import PurePosixPath
-from typing import IO
-
 import telethon as tg
 
-from .. import command, module, util
+from .. import module, util
 
 
 class ExampleModule(module.Module):

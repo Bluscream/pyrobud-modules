@@ -1,8 +1,8 @@
 import asyncio
 import re
 from datetime import timedelta, datetime, timezone
-from telethon.tl.types import PeerUser, PeerChannel
-from .. import command, module, util
+from telethon.tl.types import PeerChannel
+from .. import module, util
 
 
 class BioLoggerModule(module.Module):
