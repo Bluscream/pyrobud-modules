@@ -2,7 +2,7 @@ from re import MULTILINE, finditer
 
 import telethon as tg
 
-from .util.bluscream import UserStr, telegram_uid_regex, linkify_fullname
+from .util.bluscream import UserStr, telegram_uid_regex
 from .. import command, module
 
 from typing import TYPE_CHECKING
