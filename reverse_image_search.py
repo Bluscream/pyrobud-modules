@@ -5,15 +5,6 @@ import telethon as tg
 from pyrobud import command, module, util
 from .classes.RevImgProvider import ReverseImageSearchProvider
 
-# Import providers with bs4 conditionally
-try:
-    from .classes.RevImgProviders import iqdb
-    PROVIDERS_AVAILABLE = True
-except ImportError as e:
-    PROVIDERS_AVAILABLE = False
-    iqdb = None
-    print(f"Warning: Could not load reverse image search providers: {e}")
-
 if TYPE_CHECKING:
     from pyrobud.core.bot import Bot
 
@@ -23,22 +14,24 @@ class ReverseImageSearch(module.Module):
     name = "Reverse Image search"
     disabled = False
 
-    def __init__(self, bot: "Bot"):
-        super().__init__(bot)
-        self.bot: "Bot" = bot
-        self.db: util.db.AsyncDB = None
-        self.providers: list[ReverseImageSearchProvider] = []
-        
-        # Only initialize providers if dependencies are available
-        if PROVIDERS_AVAILABLE and iqdb:
-            self.providers.append(iqdb.Provider())
-            # Add more providers here when available:
-            # self.providers.append(dans.Provider())
-            # self.providers.append(sauce.Provider())
-            # self.providers.append(tineye.Provider())
+    bot: "Bot"
+    db: util.db.AsyncDB
 
     async def on_load(self) -> None:
+        """Initialize module and import dependencies."""
+        # Dependencies are now guaranteed to be installed by the decorator
+        from .classes.RevImgProviders import iqdb
+        
         self.db = self.bot.get_db("reverse_image_search")
+        
+        self.providers: list[ReverseImageSearchProvider] = [
+            iqdb.Provider(),
+            # Add more providers here when available:
+            # dans.Provider(),
+            # sauce.Provider(),
+            # tineye.Provider()
+        ]
+        
         for provider in self.providers:
             provider.start()
 
@@ -49,9 +42,6 @@ class ReverseImageSearch(module.Module):
     @command.desc("Reverse search a image or a profile picture")
     @command.alias("rev")
     async def cmd_reverse(self, ctx: command.Context) -> str:
-        if not PROVIDERS_AVAILABLE or not self.providers:
-            return "Reverse image search is not available - bs4 (BeautifulSoup4) is not installed"
-        
         await ctx.respond("Processing...")
 
         photos: dict[str,bytes] = {}

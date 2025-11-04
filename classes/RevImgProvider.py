@@ -1,16 +1,22 @@
-import asyncio
+import asyncio, json, re
 from dataclasses import dataclass
-from enum import Enum
-from random import choice, randint, randrange
-from urllib import parse
 from datetime import datetime, timedelta
-from typing import TYPE_CHECKING, List, ClassVar, Any
-from enum import auto
-import telethon as tg
-import json, re
-from aiohttp import ClientSession, FormData, ClientResponse
-from pathlib import Path
+from enum import Enum, auto
 from os import path as ospath
+from pathlib import Path
+from random import choice, randint, randrange
+from typing import TYPE_CHECKING, List, ClassVar, Any
+from urllib import parse
+import telethon as tg
+
+try:
+    from aiohttp import ClientSession, FormData, ClientResponse
+    AIOHTTP_AVAILABLE = True
+except ImportError:
+    AIOHTTP_AVAILABLE = False
+    ClientSession = None
+    FormData = None
+    ClientResponse = None
 
 # from pyrobud.util.bluscream import get_id
 
@@ -36,6 +42,8 @@ class ReverseImageSearchProvider(object):
         print(f"Initializing Image Reverse Search provider {self.name}")
 
     def start(self) -> None:
+        if not AIOHTTP_AVAILABLE:
+            raise ImportError("aiohttp is required for ReverseImageSearchProvider")
         self.session = ClientSession()
 
     async def temp_upload(self, file_path:Path, file_data:bytes) -> ClientResponse | str:

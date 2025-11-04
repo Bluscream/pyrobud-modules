@@ -1,7 +1,13 @@
 import json
-from aiohttp import ClientSession
 from datetime import datetime
 from urllib.parse import quote
+
+try:
+    from aiohttp import ClientSession
+    AIOHTTP_AVAILABLE = True
+except ImportError:
+    AIOHTTP_AVAILABLE = False
+    ClientSession = None
 
 from .. import command, module, util
 from .classes.IpApi import IPAPIResponse, ipapi_response_from_dict
@@ -14,13 +20,15 @@ class WeatherModule(module.Module):
     disabled = False
 
     db: util.db.AsyncDB
-    http: ClientSession
+    http: "ClientSession"
 
     url_api_ip: str = "http://ip-api.com/json/{ip}?fields=66846719"
     url_api_location: str = "https://nominatim.openstreetmap.org/search?q={search}&format=json"
     url_api_weather: str = "https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum&timezone=Europe%2FBerlin&forecast_days=1"
 
     async def on_load(self) -> None:
+        if not AIOHTTP_AVAILABLE:
+            raise ImportError("aiohttp is required for WeatherModule")
         self.db = self.bot.get_db("weather")
         self.http = ClientSession()
 

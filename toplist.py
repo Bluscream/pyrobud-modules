@@ -8,18 +8,15 @@ from pyrobud import command, module, util
 class TopListModule(module.Module):
     name = "Top Lists"
     disabled = True
+    last_edited = 0
     
     async def on_load(self) -> None:
         """Initialize module and import dependencies."""
-        # Dependencies are now guaranteed to be installed
-        global BeautifulSoup, element
-        from bs4 import BeautifulSoup, element
-    # no_mention_pattern = compile(r'<template type="([\w_]+)" value_type="([\w_]+)">([\w\s_]+)</template>')
-    # user_pattern = compile(r'<user id="(\d+)" first_name="\w+" last_name="\w+" user_name="\w+"/>')
-    last_edited = 0
+        # Dependencies are now guaranteed to be installed by the decorator
+        pass
 
     async def parse_message(self, msg: tg.custom.Message):
-        from bs4 import BeautifulSoup
+        from bs4 import BeautifulSoup, element
         
         txt = msg.raw_text
         html = BeautifulSoup(txt, features="html.parser")

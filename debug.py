@@ -16,27 +16,66 @@ class DebugModuleAddon(module.Module):
     @command.desc("Prints info about a certain user")
     @command.alias("uinfo")
     async def cmd_userinfo(self, ctx: command.Context) -> str:
-        text = ctx.input
+        """Get detailed information about a user including datacenter location."""
+        # Get user from input or reply
         user: tg.types.User = None
-        if text: user = await self.bot.client.get_entity(int(text)) 
-        elif ctx.msg.is_reply: user = (await ctx.msg.get_reply_message()).get_sender()
-        if not user: return "Could not find user anywhere!"
-        dc: DataCenter = self.bot.dc.dcs[user.photo.dc_id]
-        reply = f'**Display Name: ** `{user.first_name} {user.last_name}`\n' \
-            f'**Username:** `@{user.username}`\n' \
-            f'**User ID:** `{user.id}`\n' \
-            f'**Status:** `{user.status.stringify()}`\n' \
-            f'**Datacenter:** `{dc.geo.city}, {dc.geo.country} ({dc.id})`\n' \
-            f'**Region:** `{dc.geo.continent}`\n'
-        return reply
+        if ctx.input:
+            try:
+                user = await self.bot.client.get_entity(int(ctx.input))
+            except (ValueError, Exception) as ex:
+                return f"Could not find user with ID {ctx.input}: {ex}"
+        elif ctx.msg.is_reply:
+            reply_msg = await ctx.msg.get_reply_message()
+            user = await reply_msg.get_sender()
+        
+        if not user:
+            return "Could not find user anywhere! Provide a user ID or reply to a message."
+        
+        # Build basic info
+        reply_lines = [
+            f'**Display Name:** `{user.first_name or ""} {user.last_name or ""}`'.strip(),
+            f'**Username:** `@{user.username}`' if user.username else '**Username:** N/A',
+            f'**User ID:** `{user.id}`'
+        ]
+        
+        # Add status if available
+        if hasattr(user, 'status') and user.status:
+            try:
+                reply_lines.append(f'**Status:** `{user.status.stringify()}`')
+            except:
+                pass
+        
+        # Add datacenter info if available
+        if hasattr(self.bot, 'dc') and self.bot.dc and user.photo and hasattr(user.photo, 'dc_id'):
+            dc_id = user.photo.dc_id
+            if dc_id in self.bot.dc.dcs:
+                dc = self.bot.dc.dcs[dc_id]
+                if dc.geo:
+                    reply_lines.append(f'**Datacenter:** `{dc.geo.city}, {dc.geo.country} (DC{dc.id})`')
+                    reply_lines.append(f'**Region:** `{dc.geo.continent}`')
+                else:
+                    reply_lines.append(f'**Datacenter:** `DC{dc.id}` (no geo info)')
+            else:
+                reply_lines.append(f'**Datacenter:** `DC{dc_id}` (not in cache)')
+        
+        return '\n'.join(reply_lines)
 
     @command.desc("Prints info about data centers")
     @command.alias("dcs")
     async def cmd_datacenters(self, ctx: command.Context) -> str:
-        reply = ["**Telegram Data Centers:**"]
-        dc: DataCenter
+        """Display information about all known Telegram datacenters."""
+        if not hasattr(self.bot, 'dc') or not self.bot.dc:
+            return "DataCenters not initialized (Startup module may be disabled)"
+        
+        if not self.bot.dc.dcs:
+            return "No datacenters in cache yet"
+        
+        reply = ["**Telegram Data Centers:**\n"]
         for dc in self.bot.dc.dcs.values():
-            reply.append(f'DC{dc.id} {dc.geo.continent if dc.geo else ""}: {dc.ping or -1}ms')
+            geo_info = f"{dc.geo.continent}" if dc.geo else "Unknown"
+            ping_info = f"{dc.ping}ms" if dc.ping >= 0 else "N/A"
+            reply.append(f'**DC{dc.id}** ({dc.code}): {geo_info} - {ping_info}')
+        
         return '\n'.join(reply)
 
     @command.desc("Dump all the data of a message to your cloud")
