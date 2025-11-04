@@ -1,12 +1,7 @@
-import asyncio
-import io
-from pathlib import PurePosixPath
-from typing import IO
-
 import telethon as tg
 
-from .. import command, module, util
-from .util.bluscream import has_affecting_media, get_id
+from .. import command, module
+from .util.bluscream import get_id
 
 
 class CalModule(module.Module):

@@ -1,17 +1,13 @@
 import asyncio
-import io
-from pathlib import PurePosixPath
-from typing import IO
 
 import telethon as tg
 
 from .. import command, module, util
 from .util.bluscream import get_entity, UserStr
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pyrobud.core.bot import Bot
-    from pyrobud import core
 
 
 class PruneModule(module.Module):

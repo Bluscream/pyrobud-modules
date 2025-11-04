@@ -21,6 +21,28 @@ tg.custom.Message.has_affecting_media = has_affecting_media
 
 telegram_uid_regex = compile(r"(?<!\d)\d{6,9}(?!\d)")
 
+async def get_entity(bot, ctx):
+    """Get a Telegram entity from context input or reply."""
+    try:
+        # If reply, get sender from replied message
+        if ctx.msg.is_reply and not ctx.input:
+            reply_msg = await ctx.msg.get_reply_message()
+            return reply_msg.sender
+        
+        # If input provided, try to parse as ID or username
+        if ctx.input:
+            # Try as integer ID first
+            try:
+                user_id = int(ctx.input)
+                return await bot.client.get_entity(user_id)
+            except ValueError:
+                # Not an integer, try as username
+                return await bot.client.get_entity(ctx.input)
+        
+        return "Please provide a user ID, username, or reply to a message"
+    except Exception as e:
+        return f"Failed to get entity: {str(e)}"
+
 def splitMsg(msg, chars=4096):
     return [msg[i:i + chars] for i in range(0, len(msg), chars)]
 

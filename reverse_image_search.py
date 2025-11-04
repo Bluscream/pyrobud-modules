@@ -1,19 +1,14 @@
-import asyncio
-import io
-from pathlib import PurePosixPath, Path
+from pathlib import PurePosixPath
 from typing import IO
 
 import telethon as tg
 from .. import command, module, util
-from aiohttp import ClientSession
-from .classes.RevImgProviders import iqdb, tineye
+from .classes.RevImgProviders import iqdb
 from .classes.RevImgProvider import ReverseImageSearchProvider
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pyrobud.core.bot import Bot
-    from pyrobud import core
-    # from pyrobud.custom_modules.ChatIncognitoBotClasses import *
 
 
 class ReverseImageSearch(module.Module):

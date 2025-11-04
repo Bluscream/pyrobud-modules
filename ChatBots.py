@@ -1,10 +1,6 @@
-import asyncio
-from random import choice, randrange
 from pyrobud import command, module, util
-from re import match, compile
-from urllib.parse import urlparse
 
-from .util.bluscream import has_affecting_media, get_id
+from .util.bluscream import get_id
 
 from .classes.ChatBot import *
 from .classes.ChatBots import ChatIncognitoBot, BetaIncognitoBot, ChattismoBot, RandomChatssBot, AnonimeChatBot

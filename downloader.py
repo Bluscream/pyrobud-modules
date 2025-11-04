@@ -1,9 +1,7 @@
-from pyrobud import command, module, util
+from pyrobud import command, module
 import os
 from pathlib import Path
-from typing import Optional, Any
 import telethon as tg
-from .util.bluscream import get_entity, UserStr
 from time import time
 
 class MediaDownloader(module.Module):

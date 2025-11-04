@@ -1,12 +1,7 @@
 import json
-from pathlib import PurePosixPath
-from typing import IO, Any
-from ipaddress import IPv4Address
 from aiohttp import ClientSession
 from datetime import datetime
 from urllib.parse import quote
-
-# import telethon as tg
 
 from .. import command, module, util
 from .classes.IpApi import IPAPIResponse, ipapi_response_from_dict
