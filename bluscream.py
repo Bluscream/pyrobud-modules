@@ -1,9 +1,7 @@
-import http.client, json, re
-from datetime import datetime, timezone
+from datetime import datetime
 
 from .. import command, module, util
 from .util.bluscream import *
-# import telethon as tg
 
 
 class Bluscream(module.Module):
@@ -23,27 +21,53 @@ class Bluscream(module.Module):
     @command.alias("tapprove")
     @command.usage("<timespan> [user or reply]", optional=True, reply=True)
     async def cmd_tempapprove(self, ctx: command.Context) -> str:
+        """Temporarily approve a user in a chat, then unapprove after the timespan."""
+        if not ctx.input:
+            return "Usage: .tapprove <timespan> [user or reply]\nExample: .tapprove 1h @username"
+        
         args = split_args(ctx.input)
-        timespan = parse_timespan(args[0])
-        msg = ctx.msg
+        if not args:
+            return "Please provide a timespan (e.g., 1h, 30m, 2d)"
+        
+        try:
+            timespan = parse_timespan(args[0])
+        except Exception as ex:
+            return f"Invalid timespan format: {args[0]}\nExample: 1h, 30m, 2d"
+        
         user = None
-
-        if msg.is_reply:
-            msg: tg.types.Message = await ctx.msg.get_reply_message()
-            user = await msg.get_sender()
-            await msg.reply("/approve")
-        elif len(args) == 2:
-            user = await self.bot.client.get_entity(args[1])
-            await self.bot.client.send_message(ctx.msg.chat_id, f"/approve {user.id}")
-
+        
+        # Get user from reply or argument
+        if ctx.msg.is_reply:
+            reply_msg = await ctx.msg.get_reply_message()
+            user = await reply_msg.get_sender()
+            await reply_msg.reply("/approve")
+        elif len(args) >= 2:
+            try:
+                user = await self.bot.client.get_entity(args[1])
+                await self.bot.client.send_message(ctx.msg.chat_id, f"/approve {user.id}")
+            except Exception as ex:
+                return f"Could not find user: {args[1]}"
+        else:
+            return "Please reply to a user or provide a user ID/username"
+        
+        if not user:
+            return "Could not get user information"
+        
         await ctx.msg.delete()
-
+        
+        # Wait for approve command to process
         await asyncio.sleep(2)
+        
         timespan_fmt = strfdelta(timespan, "{days}d {hours}h {minutes}m {seconds}s")
-        await self.bot.client.send_message(ctx.msg.chat_id, message=f"{UserStr(user)}, you have been temporarily approved for {timespan_fmt}. Use your time wisely ;)")
-
+        await self.bot.client.send_message(
+            ctx.msg.chat_id, 
+            message=f"{UserStr(user)}, you have been temporarily approved for {timespan_fmt}. Use your time wisely ;)"
+        )
+        
+        # Wait for the duration
         await asyncio.sleep(timespan.total_seconds())
-
+        
+        # Unapprove the user
         await self.bot.client.send_message(ctx.msg.chat_id, f"/unapprove {user.id}")
 
 
@@ -56,8 +80,9 @@ class Bluscream(module.Module):
         await self.bot.client.send_message(chat_id, text)
 
     @command.desc("Send local date and time to chat")
-    @command.usage("[text to echo?, or reply]", optional=True, reply=True)
     async def cmd_time(self, ctx: command.Context) -> str:
+        """Display the current local time."""
         local_time = datetime.now()
-        formatted_time = local_time.strftime("Local Time:\n`%H:%M %p` (`GMT+1`)\n`%d.%m.%Y`") # todo: unhardcode TZ
+        # TODO: Get timezone from system instead of hardcoding GMT+1
+        formatted_time = local_time.strftime("Local Time:\n`%H:%M %p` (`GMT+1`)\n`%d.%m.%Y`")
         return formatted_time
