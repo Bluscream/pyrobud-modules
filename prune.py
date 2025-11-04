@@ -69,9 +69,9 @@ class PruneModule(module.Module):
     
 
     @command.desc("Prunes all messages of a specified user in the current chat")
-    @command.alias("pruneuser")
+    @command.alias("pruneu")
     @command.usage("[user name, id or reply]", optional=False, reply=True)
-    async def cmd_prune(self, ctx: command.Context) -> str:
+    async def cmd_pruneuser(self, ctx: command.Context) -> str:
         chat = ctx.msg.chat_id
         user = await self.bot.client.get_me()
         if ctx.input:
