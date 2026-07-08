@@ -6,8 +6,8 @@ class myTeamspeak(module.Module):
     name = "myTeamspeak"
     disabled = False
     myts_login = {
-        'email': 'admin@timo.de.vc',
-        'password': 'dhuQdXzeAGKKSBVMH4YQ5voboNwcTdS4M8BzqAPuBk7u4QrWxnfaKTSPjLY4KwyH',
+        'email': 'xxx',
+        'password': 'xxx',
     }
     
     def redeem_ts_badge(self, code: str):
