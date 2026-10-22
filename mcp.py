@@ -41,7 +41,19 @@ def _message(msg: tg.custom.Message) -> Dict[str, Any]:
         "text": msg.raw_text,
         "reply_to": msg.reply_to_msg_id,
         "media": type(msg.media).__name__ if msg.media else None,
+        "links": _links(msg),
     }
+
+
+def _links(msg: tg.custom.Message) -> List[Dict[str, str]]:
+    """URLs behind text links and inline buttons, which raw_text drops."""
+    links = [
+        {"text": text, "url": ent.url}
+        for ent, text in (msg.get_entities_text(tg.tl.types.MessageEntityTextUrl) or [])
+    ]
+    for row in msg.buttons or []:
+        links.extend({"text": b.text, "url": b.url} for b in row if getattr(b, "url", None))
+    return links
 
 
 def _entity(ent: Any) -> Dict[str, Any]:
