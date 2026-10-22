@@ -136,6 +136,18 @@ class MCPModule(module.Module):
                 },
                 "run": self.tool_send_message,
             },
+            "download_media": {
+                "description": "Save a message's attachment into the bot's cfg/downloads folder and return its path.",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "chat": {"type": ["integer", "string"]},
+                        "message_id": {"type": "integer"},
+                    },
+                    "required": ["chat", "message_id"],
+                },
+                "run": self.tool_download_media,
+            },
             "mark_read": {
                 "description": "Mark a chat as read.",
                 "schema": {
@@ -270,6 +282,13 @@ class MCPModule(module.Module):
             _chat_ref(args["chat"]), args["text"], reply_to=args.get("reply_to")
         )
         return _message(msg)
+
+    async def tool_download_media(self, args: Dict[str, Any]) -> Dict[str, Any]:
+        msg = await self.bot.client.get_messages(_chat_ref(args["chat"]), ids=int(args["message_id"]))
+        if msg is None or not msg.media:
+            raise ValueError("message has no attachment")
+        path = await self.bot.client.download_media(msg, file="/data/cfg/downloads/")
+        return {"path": path, "name": msg.file.name if msg.file else None, "size": msg.file.size if msg.file else None}
 
     async def tool_mark_read(self, args: Dict[str, Any]) -> Dict[str, Any]:
         await self.bot.client.send_read_acknowledge(_chat_ref(args["chat"]))
