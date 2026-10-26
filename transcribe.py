@@ -1,5 +1,6 @@
 import asyncio
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -19,6 +20,46 @@ except ModuleNotFoundError:
         pip_error = e
 
 from pyrobud import command, module
+
+
+def _get_ffmpeg_binary() -> str:
+    # 1. System PATH
+    exe = shutil.which("ffmpeg")
+    if exe:
+        return exe
+
+    # 2. imageio-ffmpeg if installed
+    try:
+        import imageio_ffmpeg
+        exe = imageio_ffmpeg.get_ffmpeg_exe()
+        if exe and os.path.exists(exe):
+            try:
+                if not os.path.exists("/usr/local/bin/ffmpeg"):
+                    os.symlink(exe, "/usr/local/bin/ffmpeg")
+            except Exception:
+                pass
+            return exe
+    except (ImportError, Exception):
+        pass
+
+    # 3. Try auto-installing imageio-ffmpeg
+    try:
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "imageio-ffmpeg"])
+        import importlib
+        importlib.invalidate_caches()
+        import imageio_ffmpeg
+        exe = imageio_ffmpeg.get_ffmpeg_exe()
+        if exe and os.path.exists(exe):
+            try:
+                if not os.path.exists("/usr/local/bin/ffmpeg"):
+                    os.symlink(exe, "/usr/local/bin/ffmpeg")
+            except Exception:
+                pass
+            return exe
+    except Exception:
+        pass
+
+    return "ffmpeg"
 
 
 class TranscribeModule(module.Module):
@@ -56,20 +97,25 @@ class TranscribeModule(module.Module):
 
             await ctx.respond("Converting audio...", mode="edit")
             wav_file = os.path.join(tmpdir, "output.wav")
+            ffmpeg_bin = _get_ffmpeg_binary()
 
             try:
                 proc = await asyncio.create_subprocess_exec(
-                    "ffmpeg", "-i", media_file, "-ac", "1", "-ar", "16000", wav_file, "-y",
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL
+                    ffmpeg_bin, "-i", media_file, "-ac", "1", "-ar", "16000", wav_file, "-y",
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE
                 )
-                await proc.wait()
+                stdout, stderr = await proc.communicate()
             except Exception as e:
                 await ctx.respond(f"FFmpeg conversion failed: {e}", mode="edit")
                 return
 
-            if not os.path.exists(wav_file):
-                await ctx.respond("FFmpeg conversion failed: output WAV file was not created.", mode="edit")
+            if proc.returncode != 0 or not os.path.exists(wav_file):
+                err_msg = stderr.decode(errors="replace").strip() if stderr else f"FFmpeg failed with code {proc.returncode}"
+                # Keep error message brief if verbose
+                if len(err_msg) > 300:
+                    err_msg = err_msg[-300:]
+                await ctx.respond(f"FFmpeg conversion failed: {err_msg}", mode="edit")
                 return
 
             await ctx.respond("Transcribing audio...", mode="edit")
