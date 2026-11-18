@@ -103,9 +103,14 @@ class StartupModule(module.Module):
             avg_tcp = total_tcp_time / successful_pings
             print(f"  📊 Average ping time: {avg_tcp:.1f}ms ({successful_pings}/{len(tcp_targets)} successful)")
         else:
-            print(f"  ⚠️  All connectivity tests failed!")
+            print("  ⚠️  All connectivity tests failed!")
         
         print("\n" + "="*60 + "\n")
+
+    async def on_stop(self) -> None:
+        dc = getattr(self.bot, "dc", None)
+        if dc is not None:
+            await dc.http.close()
 
     async def on_load(self) -> None:
         """Initialize DataCenters and run startup diagnostics."""

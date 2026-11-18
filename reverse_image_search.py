@@ -35,6 +35,11 @@ class ReverseImageSearch(module.Module):
         for provider in self.providers:
             provider.start()
 
+    async def on_stop(self) -> None:
+        for provider in self.providers:
+            if provider.session:
+                await provider.session.close()
+
     # async def on_message(self, event: tg.events.NewMessage.Event) -> None:
     #     self.log.info(f"Received message: {event.message}")
     #     await self.db.inc("messages_received")

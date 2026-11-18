@@ -30,7 +30,7 @@ class WeatherModule(module.Module):
         if not AIOHTTP_AVAILABLE:
             raise ImportError("aiohttp is required for WeatherModule")
         self.db = self.bot.get_db("weather")
-        self.http = ClientSession()
+        self.http = self.bot.http
 
     async def get_ipinfo(self, ip):
         print(f"Getting ip info for {ip}")
@@ -81,7 +81,7 @@ class WeatherModule(module.Module):
             json_data = json.loads(text)
             print(f"Got weather info: {json.dumps(json_data)}")
             weather: WeatherResponse = weather_response_from_dict(json_data)
-            if not input: lines.append(f"**My Current weather:**")
+            if not input: lines.append("**My Current weather:**")
             else: lines.append(f"**Current weather in {place}:**")
             dt = datetime.fromisoformat(weather.current.time)
             formatted_time = dt.strftime("%d.%m.%Y %H:%M:%S")
